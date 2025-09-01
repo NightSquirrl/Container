@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue3 Transition + v-if 滑动效果</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+```
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app {
+  max-width: 800px;
+  width: 100%;
+  padding: 20px;
+}
+
+.title {
+  text-align: center;
+  color: white;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.slider-wrapper {
+  position: relative;
+  height: 400px;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  margin-bottom: 30px;
+}
+
+.slide-item {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  border-radius: 20px;
+}
+
+.container h2 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.container p {
+  font-size: 1.3rem;
+  opacity: 0.9;
+  max-width: 80%;
+  line-height: 1.6;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.control-btn {
+  padding: 15px 30px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.control-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.indicators {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator.active {
+  background: white;
+  transform: scale(1.2);
+}
+
+.debug-info {
+  color: white;
+  background: rgba(0,0,0,0.2);
+  padding: 20px;
+  border-radius: 10px;
+  font-family: monospace;
+}
+
+.debug-info h3 {
+  margin-bottom: 10px;
+  color: #ffd700;
+}
+
+.debug-info p {
+  margin: 5px 0;
+}
+```
+
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="app">
+      <h1 class="title">Vue3 Transition + v-if 滑动效果</h1>
+
+```
+  <div class="slider-wrapper" ref="sliderWrapper">
+    <Transition
+      :name="transitionName"
+      mode="out-in"
+      @before-enter="onBeforeEnter"
+      @enter="onEnter"
+      @after-enter="onAfterEnter"
+      @before-leave="onBeforeLeave"
+      @leave="onLeave"
+      @after-leave="onAfterLeave"
+    >
+      <div 
+        v-if="containers[currentIndex]"
+        :key="currentIndex"
+        class="slide-item"
+        ref="currentSlide"
+      >
+        <div 
+          class="container"
+          :style="{ 
+            background: containers[currentIndex].gradient,
+            transform: `translateX(${currentTransform}px)`
+          }"
+        >
+          <h2>{{ containers[currentIndex].title }}</h2>
+          <p>{{ containers[currentIndex].content }}</p>
+        </div>
+      </div>
+    </Transition>
+  </div>
+
+  <div class="controls">
+    <button 
+      class="control-btn" 
+      @click="goToPrev"
+      :disabled="isTransitioning"
+    >
+      ← 向左滑动
+    </button>
+    <button 
+      class="control-btn" 
+      @click="goToNext"
+      :disabled="isTransitioning"
+    >
+      向右滑动 →
+    </button>
+  </div>
+
+  <div class="indicators">
+    <div 
+      v-for="(container, index) in containers" 
+      :key="index"
+      class="indicator"
+      :class="{ active: index === currentIndex }"
+      @click="goToIndex(index)"
+    />
+  </div>
+
+  <div class="debug-info">
+    <h3>过渡状态调试信息：</h3>
+    <p>当前索引: {{ currentIndex }}</p>
+    <p>过渡方向: {{ direction }}</p>
+    <p>过渡名称: {{ transitionName }}</p>
+    <p>过渡状态: {{ isTransitioning ? '进行中' : '空闲' }}</p>
+    <p>当前变换: {{ currentTransform }}px</p>
+    <p>容器宽度: {{ containerWidth }}px</p>
+    <p>过渡阶段: {{ currentPhase }}</p>
+  </div>
+</div>
+```
+
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        // 响应式数据
+        const currentIndex = ref(0);
+        const direction = ref('right');
+        const isTransitioning = ref(false);
+        const containerWidth = ref(800);
+        const currentTransform = ref(0);
+        const currentPhase = ref('idle');
+        const sliderWrapper = ref(null);
+        const currentSlide = ref(null);
+
+        // 容器数据
+        const containers = ref([
+          {
+            id: 1,
+            title: '容器 1',
+            content: '这是第一个容器，使用Transition + v-if控制显示',
+            gradient: 'linear-gradient(135deg, #ff6b6b, #ee5a52)'
+          },
+          {
+            id: 2,
+            title: '容器 2', 
+            content: '第二个容器，通过JavaScript控制滑动坐标',
+            gradient: 'linear-gradient(135deg, #4ecdc4, #44a08d)'
+          },
+          {
+            id: 3,
+            title: '容器 3',
+            content: '第三个容器，支持左滑和右滑动画效果',
+            gradient: 'linear-gradient(135deg, #45b7d1, #2196f3)'
+          },
+          {
+            id: 4,
+            title: '容器 4',
+            content: '第四个容器，完全通过JS控制动画过程',
+            gradient: 'linear-gradient(135deg, #f093fb, #f5576c)'
+          }
+        ]);
+
+        // 计算过渡名称
+        const transitionName = computed(() => {
+          return direction.value === 'left' ? 'slide-left' : 'slide-right';
+        });
+
+        // 动画函数
+        const animateElement = (element, startX, endX, duration = 600) => {
+          return new Promise((resolve) => {
+            const startTime = performance.now();
+            
+            // 缓动函数
+            const easeInOutCubic = (t) => {
+              return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+            };
+
+            const animate = (currentTime) => {
+              const elapsed = currentTime - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const easedProgress = easeInOutCubic(progress);
+              
+              const currentPos = startX + (endX - startX) * easedProgress;
+              currentTransform.value = currentPos;
+              
+              if (element && element.querySelector('.container')) {
+                element.querySelector('.container').style.transform = `translateX(${currentPos}px)`;
+              }
+              
+              if (progress < 1) {
+                requestAnimationFrame(animate);
+              } else {
+                resolve();
+              }
+            };
+            
+            requestAnimationFrame(animate);
+          });
+        };
+
+        // Transition 钩子函数
+        const onBeforeEnter = (el) => {
+          currentPhase.value = 'before-enter';
+          isTransitioning.value = true;
+          
+          // 设置进入元素的初始位置
+          const startX = direction.value === 'left' ? containerWidth.value : -containerWidth.value;
+          currentTransform.value = startX;
+          
+          if (el.querySelector('.container')) {
+            el.querySelector('.container').style.transform = `translateX(${startX}px)`;
+          }
+        };
+
+        const onEnter = async (el, done) => {
+          currentPhase.value = 'entering';
+          
+          // 等待下一帧确保初始位置已应用
+          await new Promise(resolve => requestAnimationFrame(resolve));
+          
+          // 动画到最终位置
+          await animateElement(el, currentTransform.value, 0);
+          
+          done();
+        };
+
+        const onAfterEnter = (el) => {
+          currentPhase.value = 'after-enter';
+          currentTransform.value = 0;
+          isTransitioning.value = false;
+          
+          if (el.querySelector('.container')) {
+            el.querySelector('.container').style.transform = 'translateX(0px)';
+          }
+        };
+
+        const onBeforeLeave = (el) => {
+          currentPhase.value = 'before-leave';
+          currentTransform.value = 0;
+          
+          if (el.querySelector('.container')) {
+            el.querySelector('.container').style.transform = 'translateX(0px)';
+          }
+        };
+
+        const onLeave = async (el, done) => {
+          currentPhase.value = 'leaving';
+          
+          // 动画到退出位置
+          const endX = direction.value === 'left' ? -containerWidth.value : containerWidth.value;
+          await animateElement(el, 0, endX);
+          
+          done();
+        };
+
+        const onAfterLeave = (el) => {
+          currentPhase.value = 'after-leave';
+          
+          if (el.querySelector('.container')) {
+            el.querySelector('.container').style.transform = '';
+          }
+        };
+
+        // 导航方法
+        const goToNext = () => {
+          if (isTransitioning.value) return;
+          direction.value = 'left';
+          currentIndex.value = (currentIndex.value + 1) % containers.value.length;
+        };
+
+        const goToPrev = () => {
+          if (isTransitioning.value) return;
+          direction.value = 'right';
+          currentIndex.value = (currentIndex.value - 1 + containers.value.length) % containers.value.length;
+        };
+
+        const goToIndex = (index) => {
+          if (index === currentIndex.value || isTransitioning.value) return;
+          direction.value = index > currentIndex.value ? 'left' : 'right';
+          currentIndex.value = index;
+        };
+
+        // 初始化
+        onMounted(() => {
+          if (sliderWrapper.value) {
+            containerWidth.value = sliderWrapper.value.offsetWidth;
+          }
+          
+          // 监听窗口大小变化
+          const handleResize = () => {
+            if (sliderWrapper.value) {
+              containerWidth.value = sliderWrapper.value.offsetWidth;
+            }
+          };
+          
+          window.addEventListener('resize', handleResize);
+          
+          // 清理
+          return () => {
+            window.removeEventListener('resize', handleResize);
+          };
+        });
+
+        return {
+          currentIndex,
+          direction,
+          isTransitioning,
+          containerWidth,
+          currentTransform,
+          currentPhase,
+          containers,
+          transitionName,
+          sliderWrapper,
+          currentSlide,
+          goToNext,
+          goToPrev,
+          goToIndex,
+          onBeforeEnter,
+          onEnter,
+          onAfterEnter,
+          onBeforeLeave,
+          onLeave,
+          onAfterLeave
+        };
+      }
+    }).mount('#app');
+  </script>
+
+</body>
+</html>
