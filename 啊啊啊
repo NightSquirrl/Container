@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixiJS 跟手粒子拖尾效果</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/pixi.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        #gameContainer {
+            border: 2px solid #333;
+            border-radius: 10px;
+        }
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        .control-group {
+            margin: 5px 0;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+        }
+        input[type="range"] {
+            width: 100px;
+        }
+        input[type="number"] {
+            width: 60px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer"></div>
+    <div class="controls">
+        <div class="control-group">
+            <label>粒子数量:</label>
+            <input type="range" id="particleCount" min="1" max="50" value="10">
+            <span id="particleCountValue">10</span>
+        </div>
+        <div class="control-group">
+            <label>生存时间(ms):</label>
+            <input type="number" id="lifeTime" min="500" max="5000" value="2000">
+        </div>
+        <div class="control-group">
+            <label>最小缩放:</label>
+            <input type="range" id="minScale" min="0.1" max="2" step="0.1" value="0.3">
+            <span id="minScaleValue">0.3</span>
+        </div>
+        <div class="control-group">
+            <label>最大缩放:</label>
+            <input type="range" id="maxScale" min="0.1" max="3" step="0.1" value="1.5">
+            <span id="maxScaleValue">1.5</span>
+        </div>
+    </div>
+
+```
+<script>
+    // 粒子拖尾效果类
+    class ParticleTrail {
+        constructor(app) {
+            this.app = app;
+            this.particles = [];
+            this.particleContainer = new PIXI.Container();
+            this.app.stage.addChild(this.particleContainer);
+            
+            // 配置参数
+            this.config = {
+                particleCount: 10,    // 每次生成的粒子数量
+                lifeTime: 2000,       // 粒子生存时间(ms)
+                minScale: 0.3,        // 最小缩放
+                maxScale: 1.5,        // 最大缩放
+                colors: [0xFF6B6B, 0x4ECDC4, 0x45B7D1, 0xF9CA24, 0xF0932B, 0xEB4D4B, 0x6C5CE7],
+            };
+            
+            // 鼠标位置
+            this.mousePos = { x: 0, y: 0 };
+            this.lastMousePos = { x: 0, y: 0 };
+            this.isMouseMoving = false;
+            
+            this.setupEventListeners();
+            this.animate();
+        }
+        
+        // 创建粒子纹理
+        createParticleTexture() {
+            const graphics = new PIXI.Graphics();
+            const radius = 20;
+            
+            // 创建渐变圆形
+            graphics.beginFill(0xFFFFFF);
+            graphics.drawCircle(radius, radius, radius);
+            graphics.endFill();
+            
+            return this.app.renderer.generateTexture(graphics);
+        }
+        
+        // 创建单个粒子
+        createParticle(x, y) {
+            const texture = this.createParticleTexture();
+            const particle = new PIXI.Sprite(texture);
+            
+            // 随机位置偏移
+            const offsetX = (Math.random() - 0.5) * 100;
+            const offsetY = (Math.random() - 0.5) * 100;
+            
+            particle.x = x + offsetX;
+            particle.y = y + offsetY;
+            particle.anchor.set(0.5);
+            
+            // 随机缩放
+            const scale = this.config.minScale + Math.random() * (this.config.maxScale - this.config.minScale);
+            particle.scale.set(scale);
+            
+            // 随机颜色
+            const color = this.config.colors[Math.floor(Math.random() * this.config.colors.length)];
+            particle.tint = color;
+            
+            // 粒子属性
+            particle.birthTime = Date.now();
+            particle.initialAlpha = 0.8 + Math.random() * 0.2;
+            particle.alpha = particle.initialAlpha;
+            particle.initialScale = scale;
+            
+            // 随机运动方向和速度
+            particle.vx = (Math.random() - 0.5) * 2;
+            particle.vy = (Math.random() - 0.5) * 2;
+            
+            // 旋转速度
+            particle.rotationSpeed = (Math.random() - 0.5) * 0.1;
+            
+            this.particleContainer.addChild(particle);
+            this.particles.push(particle);
+        }
+        
+        // 生成粒子群
+        emitParticles(x, y) {
+            for (let i = 0; i < this.config.particleCount; i++) {
+                this.createParticle(x, y);
+            }
+        }
+        
+        // 更新粒子
+        updateParticles() {
+            const currentTime = Date.now();
+            
+            for (let i = this.particles.length - 1; i >= 0; i--) {
+                const particle = this.particles[i];
+                const age = currentTime - particle.birthTime;
+                const lifeRatio = age / this.config.lifeTime;
+                
+                if (lifeRatio >= 1) {
+                    // 粒子生命结束，移除
+                    this.particleContainer.removeChild(particle);
+                    this.particles.splice(i, 1);
+                    continue;
+                }
+                
+                // 更新位置
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                
+                // 更新旋转
+                particle.rotation += particle.rotationSpeed;
+                
+                // 应用摩擦力
+                particle.vx *= 0.98;
+                particle.vy *= 0.98;
+                
+                // 更新透明度（淡出效果）
+                particle.alpha = particle.initialAlpha * (1 - lifeRatio);
+                
+                // 更新缩放（缩小效果）
+                const scaleRatio = 1 - lifeRatio * 0.5;
+                particle.scale.set(particle.initialScale * scaleRatio);
+            }
+        }
+        
+        // 设置事件监听
+        setupEventListeners() {
+            const canvas = this.app.view;
+            
+            // 鼠标移动事件
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                this.lastMousePos.x = this.mousePos.x;
+                this.lastMousePos.y = this.mousePos.y;
+                this.mousePos.x = e.clientX - rect.left;
+                this.mousePos.y = e.clientY - rect.top;
+                this.isMouseMoving = true;
+            });
+            
+            // 鼠标离开画布
+            canvas.addEventListener('mouseleave', () => {
+                this.isMouseMoving = false;
+            });
+            
+            // 鼠标进入画布
+            canvas.addEventListener('mouseenter', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                this.mousePos.x = e.clientX - rect.left;
+                this.mousePos.y = e.clientY - rect.top;
+                this.lastMousePos.x = this.mousePos.x;
+                this.lastMousePos.y = this.mousePos.y;
+            });
+        }
+        
+        // 动画循环
+        animate() {
+            // 如果鼠标在移动，生成粒子
+            if (this.isMouseMoving) {
+                // 计算鼠标移动距离，距离越大生成越多粒子
+                const dx = this.mousePos.x - this.lastMousePos.x;
+                const dy = this.mousePos.y - this.lastMousePos.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > 5) { // 只有移动距离超过5像素才生成粒子
+                    this.emitParticles(this.mousePos.x, this.mousePos.y);
+                }
+            }
+            
+            // 更新所有粒子
+            this.updateParticles();
+            
+            // 检查鼠标是否停止移动
+            if (Math.abs(this.mousePos.x - this.lastMousePos.x) < 1 && 
+                Math.abs(this.mousePos.y - this.lastMousePos.y) < 1) {
+                this.isMouseMoving = false;
+            }
+        }
+        
+        // 更新配置
+        updateConfig(newConfig) {
+            Object.assign(this.config, newConfig);
+        }
+    }
+    
+    // 初始化PIXI应用
+    const app = new PIXI.Application({
+        width: 800,
+        height: 600,
+        backgroundColor: 0x1a1a2e,
+        antialias: true,
+        resolution: window.devicePixelRatio || 1,
+        autoDensity: true
+    });
+    
+    document.getElementById('gameContainer').appendChild(app.view);
+    
+    // 创建粒子拖尾效果
+    const particleTrail = new ParticleTrail(app);
+    
+    // 添加到ticker
+    app.ticker.add(() => {
+        particleTrail.animate();
+    });
+    
+    // 控制面板事件
+    const particleCountSlider = document.getElementById('particleCount');
+    const particleCountValue = document.getElementById('particleCountValue');
+    const lifeTimeInput = document.getElementById('lifeTime');
+    const minScaleSlider = document.getElementById('minScale');
+    const minScaleValue = document.getElementById('minScaleValue');
+    const maxScaleSlider = document.getElementById('maxScale');
+    const maxScaleValue = document.getElementById('maxScaleValue');
+    
+    particleCountSlider.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value);
+        particleCountValue.textContent = value;
+        particleTrail.updateConfig({ particleCount: value });
+    });
+    
+    lifeTimeInput.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value);
+        particleTrail.updateConfig({ lifeTime: value });
+    });
+    
+    minScaleSlider.addEventListener('input', (e) => {
+        const value = parseFloat(e.target.value);
+        minScaleValue.textContent = value;
+        particleTrail.updateConfig({ minScale: value });
+    });
+    
+    maxScaleSlider.addEventListener('input', (e) => {
+        const value = parseFloat(e.target.value);
+        maxScaleValue.textContent = value;
+        particleTrail.updateConfig({ maxScale: value });
+    });
+    
+    // 添加说明文字
+    const instructions = new PIXI.Text('移动鼠标查看粒子拖尾效果', {
+        fontFamily: 'Arial',
+        fontSize: 24,
+        fill: 0xffffff,
+        alpha: 0.7
+    });
+    instructions.anchor.set(0.5);
+    instructions.x = app.screen.width / 2;
+    instructions.y = app.screen.height / 2;
+    app.stage.addChild(instructions);
+    
+    // 鼠标移动时隐藏说明文字
+    app.view.addEventListener('mousemove', () => {
+        instructions.alpha = Math.max(0, instructions.alpha - 0.02);
+    });
+</script>
+```
+
+</body>
+</html>
