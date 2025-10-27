@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+<button onclick="testFile()">click</button>
+
+  </body>
+
+  <script>
+    async function testFile() {
+      const a = await window.showOpenFilePicker({
+        startIn: "pictures",
+        multiple: true,
+        types: [
+          {
+            accept: {
+              "image/*": [".png", ".gif", ".jpeg", ".jpg"],
+            },
+          },
+        ],
+      });
+
+      const files = await Promise.all(a.map((item) => item.getFile()));
+      console.log(
+        "%c files",
+        "background-color:red;color:#fff;padding:5px;border-radius:5px",
+        files
+      );
+    }
+  </script>
+</html>
