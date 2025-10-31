@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  #container {
+    width: 800px;
+    height: 600px;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    position: relative;
+    background: #f9f9f9;
+    user-select: none; /* 防止拖拽选中文本 */
+  }
+  #content {
+    width: 1200px;
+    height: 900px;
+    background: linear-gradient(45deg, #eee, #ccc);
+    transform-origin: 0 0;
+    position: absolute;
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="content">
+    缩放 + 空格拖拽演示
+  </div>
+</div>
+
+<script>
+(function(){
+  const container = document.getElementById('container');
+  const content = document.getElementById('content');
+
+  let scale = 1;
+  let translateX = 0;
+  let translateY = 0;
+  let isSpaceDown = false;
+  let isDragging = false;
+  let lastMouseX = 0;
+  let lastMouseY = 0;
+
+  // ===== 键盘监听：检测空格按下状态 =====
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && !isSpaceDown) {
+      isSpaceDown = true;
+      e.preventDefault(); // 防止页面滚动
+    }
+  });
+  window.addEventListener('keyup', (e) => {
+    if (e.code === 'Space') {
+      isSpaceDown = false;
+    }
+  });
+
+  // ===== 缩放事件：Ctrl + 滚轮 =====
+  container.addEventListener('wheel', function(e) {
+    if (!e.ctrlKey) return; // 只有按住 Ctrl 才缩放
+    e.preventDefault();
+
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+    const newScale = scale * zoomFactor;
+
+    // 缩放前鼠标相对内容的坐标
+    const offsetX = (mouseX - translateX) / scale;
+    const offsetY = (mouseY - translateY) / scale;
+
+    // 调整偏移以保持鼠标对应内容位置不变
+    translateX = mouseX - offsetX * newScale;
+    translateY = mouseY - offsetY * newScale;
+
+    scale = newScale;
+    content.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+  });
+
+  // ===== 拖拽事件：按住空格时鼠标拖动 =====
+  container.addEventListener('mousedown', function(e) {
+    if (isSpaceDown) {
+      isDragging = true;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      e.preventDefault(); // 防止选中文本
+    }
+  });
+
+  window.addEventListener('mousemove', function(e) {
+    if (isDragging) {
+      const dx = e.clientX - lastMouseX;
+      const dy = e.clientY - lastMouseY;
+      translateX += dx;
+      translateY += dy;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      content.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    }
+  });
+
+  window.addEventListener('mouseup', function() {
+    isDragging = false;
+  });
+
+})();
+</script>
+</body>
+</html>
