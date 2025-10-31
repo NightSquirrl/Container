@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<style>
+  #container {
+    width: 800px;
+    height: 600px;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    position: relative;
+    background: #f9f9f9;
+  }
+  #content {
+    width: 1200px;
+    height: 900px;
+    background: #ddd;
+    transform-origin: 0 0; /* 左上角为原点，方便计算 */
+    position: absolute;
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="content">
+    前端缩放演示区域
+  </div>
+</div>
+
+<script>
+(function(){
+  const container = document.getElementById('container');
+  const content = document.getElementById('content');
+
+  let scale = 1;
+  let translateX = 0;
+  let translateY = 0;
+
+  container.addEventListener('wheel', function(e) {
+    if (!e.ctrlKey) return; // 只有按住 Ctrl 才缩放
+    e.preventDefault(); // 阻止默认缩放页面
+
+    // 鼠标相对于 container 的位置
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9; // 向上滚放大，向下滚缩小
+    const newScale = scale * zoomFactor;
+
+    // 鼠标相对于内容的坐标（缩放前）
+    const offsetX = (mouseX - translateX) / scale;
+    const offsetY = (mouseY - translateY) / scale;
+
+    // 缩放后保持鼠标指向的内容位置不动
+    translateX = mouseX - offsetX * newScale;
+    translateY = mouseY - offsetY * newScale;
+
+    // 更新参数
+    scale = newScale;
+    content.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+  });
+
+})();
+</script>
+</body>
+</html>
