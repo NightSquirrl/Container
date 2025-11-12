@@ -1,0 +1,139 @@
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="1200" height="800" fill="#f0f8ff" stroke="#333" stroke-width="2"/>
+  
+  <!-- 展现层 -->
+  <rect x="50" y="50" width="1100" height="120" fill="#4a90e2" stroke="#333" stroke-width="2"/>
+  <text x="80" y="90" font-family="Arial" font-size="18" font-weight="bold" fill="white">展现层</text>
+  
+  <!-- 展现层组件 -->
+  <rect x="200" y="70" width="180" height="80" fill="#66b3ff" stroke="#333" stroke-width="1"/>
+  <text x="210" y="95" font-family="Arial" font-size="12" font-weight="bold" fill="white">Vue3 模板</text>
+  <text x="210" y="115" font-family="Arial" font-size="11" fill="white">(Template)</text>
+  <text x="210" y="135" font-family="Arial" font-size="11" fill="white">遍历渲染</text>
+  
+  <rect x="400" y="70" width="180" height="80" fill="#66b3ff" stroke="#333" stroke-width="1"/>
+  <text x="410" y="95" font-family="Arial" font-size="12" font-weight="bold" fill="white">ImageView.vue</text>
+  <text x="410" y="115" font-family="Arial" font-size="11" fill="white">视图组件</text>
+  
+  <rect x="600" y="70" width="180" height="80" fill="#66b3ff" stroke="#333" stroke-width="1"/>
+  <text x="610" y="95" font-family="Arial" font-size="12" font-weight="bold" fill="white">TextView.vue</text>
+  <text x="610" y="115" font-family="Arial" font-size="11" fill="white">视图组件</text>
+  
+  <rect x="800" y="70" width="180" height="80" fill="#66b3ff" stroke="#333" stroke-width="1"/>
+  <text x="810" y="95" font-family="Arial" font-size="12" font-weight="bold" fill="white">ButtonView.vue</text>
+  <text x="810" y="115" font-family="Arial" font-size="11" fill="white">视图组件</text>
+  
+  <!-- 响应式层 -->
+  <rect x="50" y="190" width="1100" height="100" fill="#50c878" stroke="#333" stroke-width="2"/>
+  <text x="80" y="225" font-family="Arial" font-size="18" font-weight="bold" fill="white">响应式层</text>
+  
+  <rect x="200" y="210" width="160" height="60" fill="#7dd87d" stroke="#333" stroke-width="1"/>
+  <text x="210" y="230" font-family="Arial" font-size="12" font-weight="bold" fill="white">Vue3 Ref</text>
+  <text x="210" y="250" font-family="Arial" font-size="11" fill="white">响应式数据</text>
+  
+  <rect x="380" y="210" width="160" height="60" fill="#7dd87d" stroke="#333" stroke-width="1"/>
+  <text x="390" y="230" font-family="Arial" font-size="12" font-weight="bold" fill="white">Vue3 Computed</text>
+  <text x="390" y="250" font-family="Arial" font-size="11" fill="white">计算属性</text>
+  
+  <rect x="560" y="210" width="160" height="60" fill="#7dd87d" stroke="#333" stroke-width="1"/>
+  <text x="570" y="230" font-family="Arial" font-size="12" font-weight="bold" fill="white">数据响应监听</text>
+  
+  <rect x="740" y="210" width="160" height="60" fill="#7dd87d" stroke="#333" stroke-width="1"/>
+  <text x="750" y="230" font-family="Arial" font-size="12" font-weight="bold" fill="white">视图更新</text>
+  <text x="750" y="250" font-family="Arial" font-size="11" fill="white">自动触发</text>
+  
+  <!-- 业务逻辑层 -->
+  <rect x="50" y="310" width="1100" height="200" fill="#9966cc" stroke="#333" stroke-width="2"/>
+  <text x="80" y="350" font-family="Arial" font-size="18" font-weight="bold" fill="white">业务逻辑层</text>
+  
+  <!-- DSL处理核心区域 -->
+  <rect x="200" y="330" width="600" height="150" fill="#b380d9" stroke="#333" stroke-width="2" stroke-dasharray="5,5"/>
+  <text x="210" y="355" font-family="Arial" font-size="14" font-weight="bold" fill="white">DSL处理核心</text>
+  
+  <rect x="220" y="370" width="120" height="50" fill="#d9b3ff" stroke="#333" stroke-width="1"/>
+  <text x="225" y="385" font-family="Arial" font-size="11" font-weight="bold" fill="#333">useDslNode</text>
+  <text x="225" y="400" font-family="Arial" font-size="10" fill="#333">方法构建</text>
+  <text x="225" y="415" font-family="Arial" font-size="10" fill="#333">dslNode结构</text>
+  
+  <rect x="360" y="370" width="120" height="50" fill="#d9b3ff" stroke="#333" stroke-width="1"/>
+  <text x="365" y="385" font-family="Arial" font-size="11" font-weight="bold" fill="#333">Node类型</text>
+  <text x="365" y="400" font-family="Arial" font-size="9" fill="#333">动画/命令/视图</text>
+  
+  <rect x="500" y="370" width="120" height="50" fill="#d9b3ff" stroke="#333" stroke-width="1"/>
+  <text x="505" y="385" font-family="Arial" font-size="11" font-weight="bold" fill="#333">表达式解析器</text>
+  <text x="505" y="400" font-family="Arial" font-size="10" fill="#333">字符串表达式</text>
+  <text x="505" y="415" font-family="Arial" font-size="10" fill="#333">数值计算</text>
+  
+  <rect x="640" y="370" width="140" height="50" fill="#d9b3ff" stroke="#333" stroke-width="1"/>
+  <text x="645" y="385" font-family="Arial" font-size="11" font-weight="bold" fill="#333">变量管理器</text>
+  <text x="645" y="400" font-family="Arial" font-size="10" fill="#333">管理和存储所有变量</text>
+  
+  <!-- Context.ts -->
+  <rect x="820" y="330" width="150" height="100" fill="#b380d9" stroke="#333" stroke-width="1"/>
+  <text x="825" y="355" font-family="Arial" font-size="12" font-weight="bold" fill="white">管理&控制</text>
+  <text x="825" y="375" font-family="Arial" font-size="11" font-weight="bold" fill="white">Context.ts</text>
+  <text x="825" y="395" font-family="Arial" font-size="10" fill="white">视图节点</text>
+  <text x="825" y="410" font-family="Arial" font-size="10" fill="white">动画节点</text>
+  <text x="825" y="425" font-family="Arial" font-size="10" fill="white">动画控制</text>
+  
+  <!-- 解析层 -->
+  <rect x="50" y="530" width="1100" height="100" fill="#ff8c42" stroke="#333" stroke-width="2"/>
+  <text x="80" y="565" font-family="Arial" font-size="18" font-weight="bold" fill="white">解析层</text>
+  
+  <rect x="200" y="550" width="160" height="60" fill="#ffad70" stroke="#333" stroke-width="1"/>
+  <text x="210" y="570" font-family="Arial" font-size="12" font-weight="bold" fill="white">DOMParser</text>
+  <text x="210" y="590" font-family="Arial" font-size="11" fill="white">DOM解析</text>
+  
+  <rect x="380" y="550" width="160" height="60" fill="#ffad70" stroke="#333" stroke-width="1"/>
+  <text x="390" y="570" font-family="Arial" font-size="12" font-weight="bold" fill="white">DOM结构转换</text>
+  <text x="390" y="590" font-family="Arial" font-size="11" fill="white">Class数据</text>
+  
+  <rect x="560" y="550" width="160" height="60" fill="#ffad70" stroke="#333" stroke-width="1"/>
+  <text x="570" y="570" font-family="Arial" font-size="12" font-weight="bold" fill="white">节点属性提取</text>
+  <text x="570" y="590" font-family="Arial" font-size="11" fill="white">name/attrs/nodeid</text>
+  
+  <rect x="740" y="550" width="160" height="60" fill="#ffad70" stroke="#333" stroke-width="1"/>
+  <text x="750" y="570" font-family="Arial" font-size="12" font-weight="bold" fill="white">数据结构构建</text>
+  <text x="750" y="590" font-family="Arial" font-size="11" fill="white">children关系建立</text>
+  
+  <!-- 数据层 -->
+  <rect x="50" y="650" width="1100" height="100" fill="#e74c3c" stroke="#333" stroke-width="2"/>
+  <text x="80" y="685" font-family="Arial" font-size="18" font-weight="bold" fill="white">数据层</text>
+  
+  <rect x="200" y="670" width="180" height="60" fill="#ff6b6b" stroke="#333" stroke-width="1"/>
+  <text x="210" y="690" font-family="Arial" font-size="12" font-weight="bold" fill="white">用户输入</text>
+  <text x="210" y="710" font-family="Arial" font-size="11" fill="white">脚本代码</text>
+  
+  <rect x="400" y="670" width="180" height="60" fill="#ff6b6b" stroke="#333" stroke-width="1"/>
+  <text x="410" y="690" font-family="Arial" font-size="12" font-weight="bold" fill="white">原始脚本</text>
+  <text x="410" y="710" font-family="Arial" font-size="11" fill="white">代码存储</text>
+  
+  <rect x="600" y="670" width="180" height="60" fill="#ff6b6b" stroke="#333" stroke-width="1"/>
+  <text x="610" y="690" font-family="Arial" font-size="12" font-weight="bold" fill="white">DOM数据</text>
+  <text x="610" y="710" font-family="Arial" font-size="11" fill="white">结构存储</text>
+  
+  <rect x="800" y="670" width="180" height="60" fill="#ff6b6b" stroke="#333" stroke-width="1"/>
+  <text x="810" y="690" font-family="Arial" font-size="12" font-weight="bold" fill="white">DSL Node</text>
+  <text x="810" y="710" font-family="Arial" font-size="11" fill="white">数据结构存储</text>
+  
+  <!-- 数据流箭头 -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  
+  <!-- 从数据层到解析层的箭头 -->
+  <line x1="750" y1="650" x2="750" y2="630" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 从解析层到业务逻辑层的箭头 -->
+  <line x1="750" y1="530" x2="750" y2="510" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 从业务逻辑层到响应式层的箭头 -->
+  <line x1="750" y1="310" x2="750" y2="290" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 从响应式层到展现层的箭头 -->
+  <line x1="750" y1="190" x2="750" y2="170" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+</svg>
