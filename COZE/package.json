@@ -1,0 +1,47 @@
+{
+  "name": "coze-react-demo",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "exit 0",
+    "build:fast": "exit 0",
+    "build:watch": "exit 0",
+    "build:prod": "cross-env MODE=app NODE_ENV=production rsbuild build",
+    "build:analyze": "BUNDLE_ANALYZE=true rsbuild build",
+    "clean": "rimraf dist",
+    "dev": "cross-env MODE=app NODE_ENV=development rsbuild dev --open",
+    "lint": "eslint ./src --cache",
+    "lint:fix": "eslint ./src --fix",
+    "ts-check": "tsc --noEmit",
+    "start": "cross-env NODE_ENV=development rsbuild dev --open",
+    "test": "exit",
+    "test:cov": "exit",
+    "watch": "exit 0"
+  },
+  "dependencies": {
+    "@douyinfe/semi-ui": "^2.88.0",
+    "@flowgram.ai/form-materials": "^1.0.2",
+    "@flowgram.ai/free-container-plugin": "^1.0.2",
+    "@flowgram.ai/free-layout-editor": "^1.0.2",
+    "@flowgram.ai/free-node-panel-plugin": "^1.0.2",
+    "@flowgram.ai/ts-config": "^1.0.2",
+    "@rsbuild/core": "^1.2.16",
+    "@rsbuild/plugin-less": "^1.1.1",
+    "@rsbuild/plugin-react": "^1.1.1",
+    "cross-env": "^7.0.3",
+    "react": "^18",
+    "react-dom": "^18",
+    "styled-components": "^5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.1",
+    "@typescript-eslint/parser": "^7.13.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.7",
+    "typescript": "^5.2.2"
+  }
+}
