@@ -1,0 +1,230 @@
+function getDominantColor(imgElement, returnType = 'rgb') {
+    return new Promise((resolve, reject) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas dimensions to the image dimensions
+        canvas.width = imgElement.width;
+        canvas.height = imgElement.height;
+
+        // Draw the image onto the canvas
+        ctx.drawImage(imgElement, 0, 0);
+
+        // Get image data from the canvas
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        const length = data.length;
+
+        let r = 0, g = 0, b = 0, count = 0;
+
+        for(let i = 0; i < length; i += 4) {
+            r += data[i];
+            g += data[i + 1];
+            b += data[i + 2];
+            count++;
+        }
+
+        // Calculate average color
+        r = Math.floor(r / count);
+        g = Math.floor(g / count);
+        b = Math.floor(b / count);
+
+        let result;
+
+        switch(returnType.toLowerCase()) {
+            case 'rgb':
+                result = `rgb(${r}, ${g}, ${b})`;
+                break;
+            case 'rgba':
+                result = `rgba(${r}, ${g}, ${b}, 1)`;
+                break;
+            case 'hex':
+                result = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+                break;
+            case 'hsb':
+                const hsb = rgbToHsb(r, g, b);
+                result = `hsb(${hsb.h}, ${hsb.s}, ${hsb.b})`;
+                break;
+            default:
+                reject(new Error('Invalid color format'));
+                return;
+        }
+
+        resolve(result);
+    });
+}
+function rgbToHsb(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+    let h = 0;
+    let s = 0;
+    let v = max;
+
+    if (delta !== 0) {
+        s = delta / max;
+        if (max === r) {
+            h = ((g - b) / delta) % 6;
+        } else if (max === g) {
+            h = (b - r) / delta + 2;
+        } else {
+            h = (r - g) / delta + 4;
+        }
+        h = Math.round(h * 60);
+        if (h < 0) h += 360;
+    }
+    return { h, s: Math.round(s * 100), b: Math.round(v * 100) };
+}
+
+
+
+
+
+
+
+
+======================================DEMO========================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<template>
+    <!-- <canvas ref="canvas" /> -->
+    <input type="file" @change="test" />
+</template>
+<script lang="ts" setup>
+// import { Application, Graphics } from "pixi.js";
+// import { onMounted, useTemplateRef } from "vue";
+
+// const canvasRef = useTemplateRef("canvas");
+
+// onMounted(async () => {
+//     const app = new Application();
+
+//     await app.init({ background: "#1099bb", canvas: canvasRef.value! });
+
+//     const aod = new Graphics();
+//     aod.rect(0, 0, 200, 200);
+//     aod.setStrokeStyle({
+//         color: 0xff0000,
+//         width: 1,
+//     });
+//     aod.stroke();
+//     app.stage.addChild(aod);
+// });
+
+function test(event) {
+    const file = event.target.files[0];
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    img.onload = async () => {
+        const result = await getDominantColor(img);
+        console.log(result, "result");
+    };
+}
+
+function getDominantColor(imgElement, returnType = "rgb"): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Set canvas dimensions to the image dimensions
+        canvas.width = imgElement.width;
+        canvas.height = imgElement.height;
+
+        // Draw the image onto the canvas
+        ctx.drawImage(imgElement, 0, 0);
+
+        // Get image data from the canvas
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        const length = data.length;
+
+        let r = 0,
+            g = 0,
+            b = 0,
+            count = 0;
+
+        for (let i = 0; i < length; i += 4) {
+            r += data[i];
+            g += data[i + 1];
+            b += data[i + 2];
+            count++;
+        }
+
+        // Calculate average color
+        r = Math.floor(r / count);
+        g = Math.floor(g / count);
+        b = Math.floor(b / count);
+
+        let result;
+
+        switch (returnType.toLowerCase()) {
+            case "rgb":
+                result = `rgb(${r}, ${g}, ${b})`;
+                break;
+            case "rgba":
+                result = `rgba(${r}, ${g}, ${b}, 1)`;
+                break;
+            case "hex":
+                result = `#${((1 << 24) + (r << 16) + (g << 8) + b)
+                    .toString(16)
+                    .slice(1)}`;
+                break;
+            case "hsb":
+                const hsb = rgbToHsb(r, g, b);
+                result = `hsb(${hsb.h}, ${hsb.s}, ${hsb.b})`;
+                break;
+            default:
+                reject(new Error("Invalid color format"));
+                return;
+        }
+
+        resolve(result);
+    });
+}
+function rgbToHsb(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+    let h = 0;
+    let s = 0;
+    let v = max;
+
+    if (delta !== 0) {
+        s = delta / max;
+        if (max === r) {
+            h = ((g - b) / delta) % 6;
+        } else if (max === g) {
+            h = (b - r) / delta + 2;
+        } else {
+            h = (r - g) / delta + 4;
+        }
+        h = Math.round(h * 60);
+        if (h < 0) h += 360;
+    }
+    return { h, s: Math.round(s * 100), b: Math.round(v * 100) };
+}
+</script>
+<style lang="less" scoped></style>
