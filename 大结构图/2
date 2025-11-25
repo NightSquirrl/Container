@@ -1,0 +1,99 @@
+		<linearGradient id="paint_linear_28" x1="1741.5" x2="1741.5" y1="141.5" y2="201.5" gradientUnits="userSpaceOnUse">
+			<stop stop-color="rgb(84,110,122)" offset="0" stop-opacity="1" />
+			<stop stop-color="rgb(55,71,79)" offset="1" stop-opacity="1" />
+		</linearGradient>
+		<g id="pixso_custom_effect_143">
+			<effect x="0.000000" y="3.000000" visibility="visible" fill="rgb(0,0,0)" fill-opacity="0.25" effectType="dropShadow" stdDeviation="2" radius="0" />
+		</g>
+		<filter id="filter_143" width="206.000000" height="77.000000" x="1898.500000" y="310.500000" filterUnits="userSpaceOnUse" customEffect="url(#pixso_custom_effect_143)" color-interpolation-filters="sRGB">
+			<feFlood flood-opacity="0" result="BackgroundImageFix" />
+			<feOffset dx="0.000000" dy="3.000000" in="SourceAlpha" />
+			<feGaussianBlur stdDeviation="0.666666687" />
+			<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0 " />
+			<feBlend result="effect_dropShadow_1" in2="BackgroundImageFix" mode="normal" />
+			<feBlend result="shape" in="SourceGraphic" in2="effect_dropShadow_1" mode="normal" />
+		</filter>
+		<g id="pixso_custom_effect_144">
+			<effect x="0.000000" y="3.000000" visibility="visible" fill="rgb(0,0,0)" fill-opacity="0.25" effectType="dropShadow" stdDeviation="2" radius="0" />
+		</g>
+		<filter id="filter_144" width="115.000000" height="58.000000" x="2073.500000" y="422.500000" filterUnits="userSpaceOnUse" customEffect="url(#pixso_custom_effect_144)" color-interpolation-filters="sRGB">
+			<feFlood flood-opacity="0" result="BackgroundImageFix" />
+			<feOffset dx="0.000000" dy="3.000000" in="SourceAlpha" />
+			<feGaussianBlur stdDeviation="0.666666687" />
+			<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0 " />
+			<feBlend result="effect_dropShadow_1" in2="BackgroundImageFix" mode="normal" />
+			<feBlend result="shape" in="SourceGraphic" in2="effect_dropShadow_1" mode="normal" />
+		</filter>
+		<g id="pixso_custom_effect_145">
+			<effect x="0.000000" y="3.000000" visibility="visible" fill="rgb(0,0,0)" fill-opacity="0.25" effectType="dropShadow" stdDeviation="2" radius="0" />
+		</g>
+		<filter id="filter_145" width="115.000000" height="58.000000" x="1810.500000" y="422.500000" filterUnits="userSpaceOnUse" customEffect="url(#pixso_custom_effect_145)" color-interpolation-filters="sRGB">
+			<feFlood flood-opacity="0" result="BackgroundImageFix" />
+			<feOffset dx="0.000000" dy="3.000000" in="SourceAlpha" />
+			<feGaussianBlur stdDeviation="0.666666687" />
+			<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0 " />
+			<feBlend result="effect_dropShadow_1" in2="BackgroundImageFix" mode="normal" />
+			<feBlend result="shape" in="SourceGraphic" in2="effect_dropShadow_1" mode="normal" />
+		</filter>
+		<g id="pixso_custom_effect_146">
+			<effect x="0.000000" y="3.000000" visibility="visible" fill="rgb(0,0,0)" fill-opacity="0.25" effectType="dropShadow" stdDeviation="2" radius="0" />
+		</g>
+		<filter id="filter_146" width="206.000000" height="87.000000" x="1898.500000" y="530.500000" filterUnits="userSpaceOnUse" customEffect="url(#pixso_custom_effect_146)" color-interpolation-filters="sRGB">
+			<feFlood flood-opacity="0" result="BackgroundImageFix" />
+			<feOffset dx="0.000000" dy="3.000000" in="SourceAlpha" />
+			<feGaussianBlur stdDeviation="0.666666687" />
+			<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0 " />
+			<feBlend result="effect_dropShadow_1" in2="BackgroundImageFix" mode="normal" />
+			<feBlend result="shape" in="SourceGraphic" in2="effect_dropShadow_1" mode="normal" />
+		</filter>
+		<g id="pixso_custom_effect_147">
+			<effect x="0.000000" y="3.000000" visibility="visible" fill="rgb(0,0,0)" fill-opacity="0.25" effectType="dropShadow" stdDeviation="2" radius="0" />
+		</g>
+		<filter id="filter_147" width="454.000000" height="105.000000" x="1769.500000" y="651.500000" filterUnits="userSpaceOnUse" customEffect="url(#pixso_custom_effect_147)" color-interpolation-filters="sRGB">
+			<feFlood flood-opacity="0" result="BackgroundImageFix" />
+			<feOffset dx="0.000000" dy="3.000000" in="SourceAlpha" />
+			<feGaussianBlur stdDeviation="0.666666687" />
+			<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0 " />
+			<feBlend result="effect_dropShadow_1" in2="BackgroundImageFix" mode="normal" />
+			<feBlend result="shape" in="SourceGraphic" in2="effect_dropShadow_1" mode="normal" />
+		</filter>
+		<g id="pixso_custom_effect_148">
+			<effect x="0.000000" y="3.000000" visibility="visible" fill="rgb(0,0,0)" fill-opacity="0.25" effectType="dropShadow" stdDeviation="2" radius="0" />
+		</g>
+		<filter id="filter_148" width="204.000000" height="65.000000" x="2319.500000" y="141.500000" filterUnits="userSpaceOnUse" customEffect="url(#pixso_custom_effect_148)" color-interpolation-filters="sRGB">
+			<feFlood flood-opacity="0" result="BackgroundImageFix" />
+			<feOffset dx="0.000000" dy="3.000000" in="SourceAlpha" />
+			<feGaussianBlur stdDeviation="0.666666687" />
+			<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0 " />
+			<feBlend result="effect_dropShadow_1" in2="BackgroundImageFix" mode="normal" />
+			<feBlend result="shape" in="SourceGraphic" in2="effect_dropShadow_1" mode="normal" />
+		</filter>
+		<linearGradient id="paint_linear_29" x1="2321.5" x2="2321.5" y1="141.5" y2="201.5" gradientUnits="userSpaceOnUse">
+			<stop stop-color="rgb(255,202,40)" offset="0" stop-opacity="1" />
+			<stop stop-color="rgb(255,179,0)" offset="1" stop-opacity="1" />
+		</linearGradient>
+		<g id="pixso_custom_effect_149">
+			<effect x="0.000000" y="3.000000" visibility="visible" fill="rgb(0,0,0)" fill-opacity="0.25" effectType="dropShadow" stdDeviation="2" radius="0" />
+		</g>
+		<filter id="filter_149" width="206.000000" height="87.000000" x="2328.500000" y="230.500000" filterUnits="userSpaceOnUse" customEffect="url(#pixso_custom_effect_149)" color-interpolation-filters="sRGB">
+			<feFlood flood-opacity="0" result="BackgroundImageFix" />
+			<feOffset dx="0.000000" dy="3.000000" in="SourceAlpha" />
+			<feGaussianBlur stdDeviation="0.666666687" />
+			<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0 " />
+			<feBlend result="effect_dropShadow_1" in2="BackgroundImageFix" mode="normal" />
+			<feBlend result="shape" in="SourceGraphic" in2="effect_dropShadow_1" mode="normal" />
+		</filter>
+		<g id="pixso_custom_effect_150">
+			<effect x="0.000000" y="3.000000" visibility="visible" fill="rgb(0,0,0)" fill-opacity="0.25" effectType="dropShadow" stdDeviation="2" radius="0" />
+		</g>
+		<filter id="filter_150" width="204.000000" height="255.000000" x="2329.500000" y="351.500000" filterUnits="userSpaceOnUse" customEffect="url(#pixso_custom_effect_150)" color-interpolation-filters="sRGB">
+			<feFlood flood-opacity="0" result="BackgroundImageFix" />
+			<feOffset dx="0.000000" dy="3.000000" in="SourceAlpha" />
+			<feGaussianBlur stdDeviation="0.666666687" />
+			<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0 " />
+			<feBlend result="effect_dropShadow_1" in2="BackgroundImageFix" mode="normal" />
+			<feBlend result="shape" in="SourceGraphic" in2="effect_dropShadow_1" mode="normal" />
+		</filter>
+		<g id="pixso_custom_effect_151">
+			<effect x="0.000000" y="4.000000" visibility="visible" fill="rgb(0,0,0)" fill-opacity="0.25" effectType="dropShadow" stdDeviation="4" radius="0" />
+		</g>
