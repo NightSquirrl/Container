@@ -1,0 +1,91 @@
+const test = [
+  {
+    input: 'ifelse(ge(840*#ratiox-#x_gra*3,840*#ratiox+10),840*#ratiox+10,840*#ratiox-#x_gra*3)',
+    expected: 'ifelse(ge(840*#ratiox-#x_gra*3,840*#ratiox+10),(840*#ratiox+10)*2,(840*#ratiox-#x_gra*3)*2)',
+    coefficient: '2',
+  },
+  {
+    input:
+      'ifelse(ge(840*#ratiox-#x_gra*3,840*#ratiox+10),840*#ratiox+10,gl(#value,#v.actual.x),#b.actual_w,840*#ratiox-#x_gra*3)',
+    expected:
+      'ifelse(ge(840*#ratiox-#x_gra*3,840*#ratiox+10),(840*#ratiox+10)*2,gl(#value,#v.actual.x),#b.actual_w,(840*#ratiox-#x_gra*3)*2)',
+    coefficient: '2',
+  },
+  {
+    input: '34*#ratioy',
+    expected: '(34*#ratioy)*2',
+    coefficient: '2',
+  },
+  {
+    input: '3.14 * #value - #item.actual_w',
+    expected: '(3.14 * #value)*2 - #item.actual_w',
+    coefficient: '2',
+  },
+  {
+    input: '#w + #time.actual_h * 5 - 3.5',
+    expected: '(#w)*2 + #time.actual_h * 5 - (3.5)*2',
+    coefficient: '2',
+  },
+  {
+    input: '(#temperature + 10) * #factor.actual_w',
+    expected: '((#temperature + 10)) * #factor.actual_w',
+    coefficient: '2',
+  },
+  {
+    input: 'ifelse(lt(#temperature,0),#tt1.actual_w,0)',
+    expected: 'ifelse(lt(#temperature,0),#tt1.actual_w,(0)*2)',
+    coefficient: '2',
+  },
+  {
+    input: 'sum(#value1, #value2) - #item.actual_w',
+    expected: '(sum(#value1, #value2))*2 - #item.actual_w',
+    coefficient: '2',
+  },
+  {
+    input: '(#temp + 5) * (#pressure - 10) / #factor.actual_w',
+    expected: '((#temp + 5) * (#pressure - 10)) / #factor.actual_w',
+    coefficient: '2',
+  },
+  {
+    input: 'ifelse(and(lt(#a,5), gt(#b,10)), #value1.actual_h, #value2)',
+    expected: 'ifelse(and(lt(#a,5), gt(#b,10)), #value1.actual_h,(#value2)*2)',
+    coefficient: '2',
+  },
+  {
+    input: 'a + b * c - d / e',
+    expected: '(a)*2 + (b * c) - (d / e)*2',
+    coefficient: '2',
+  },
+  {
+    input: 'ge(840*#ratiox-#x_gra*3,840*#ratiox+10)',
+    expected: '(ge(840*#ratiox-#x_gra*3,840*#ratiox+10))*2',
+    coefficient: '2',
+  },
+  {
+    input: 'min(#value1, #value2.actual_h)',
+    expected: '(min(#value1, #value2.actual_h))*2',
+    coefficient: '2',
+  },
+  {
+    input: 'ifelse(le(#h,2400),885+(#h-1920)/8*4.5,670+(#h-1920))+#JAni_1/2',
+    expected: 'ifelse(le(#h,2400),(885+(#h-1920)/8*4.5)*2,(670+(#h-1920)*2))+#JAni_1/2*2',
+    coefficient: '2',
+  },
+  {
+  input:'(237+lt(#min_temp,0)*#min1.actual_w)*#ratio',
+  expected:'(237*2+lt(#min_temp,0)*#min1.actual_w)*#ratio',
+      coefficient: '2',
+  }
+];
+
+test 是一个测试用例,coefficient 是需要乘以的系数,input 是出入的字符串表达式 expected 是期望返回的结果,
+使用javascript 帮我生成一个函数,参数以是一个字符串表达式 ,参数2是系数
+表达式指的是含有数学的表达式,如果多个数之间使用或者/ 代表他们是一个整体
+如果一个整体符合正则 /#\w+.(text_(width|height))|(actual_(w|h))\b/ 则不需要参数2的系数,如果不满足就需要系数
+比如输入 34#ratioy 结果应该是 (34*#ratioy)*系数
+输入 3.14 * #value - #item.actual_w 结果是 (3.14 * #value)2 - #item.actual_w,可以看到只要满足正则就不需要系数
+
+除此之外还有一种特殊的表达式就是ifelse,
+比如 ifelse(x,y,z) 条件判断，如果x大于0，则返回值为y，否则返回值为z
+ifelse(x1,y1,x2,y2,...,z),if x1 > 0 return y1; else if x2 > 0 return y2; ... ; else return z。循环条件判断，如果x1大于零则返回y1，否则判断如果x2大于零则返回y2，否则判断xn是否大于零，如果大于0返回yn，否则返回z。至少有三个值x1,y1,z来完成整个条件的判断。如果在前面的返回中没有返回值，则最终返回最后一个值。
+ifelse 这种它是有判断的位置,判断的位置不需要处理,只有真正的返回的表达式才需要处理
