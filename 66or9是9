@@ -1,0 +1,61 @@
+function compressBmpImage(bmpData, targetColorDepth) {
+    // 1. 解析BMP文件头
+    const fileHeader = bmpData.slice(0, 14);
+    const infoHeader = bmpData.slice(14, 54);
+    const width = infoHeader.readUInt32LE(4);  // 获取图片宽度
+    const height = infoHeader.readUInt32LE(8); // 获取图片高度
+    const colorDepth = infoHeader.readUInt16LE(14); // 获取颜色深度
+    
+    if (colorDepth !== 24) {
+        throw new Error("Only 24-bit BMP images are supported.");
+    }
+
+    // 2. 获取调色板 (仅在8位以下时存在)
+    const paletteSize = 256 * 4; // 8-bit BMP使用256色
+    const palette = bmpData.slice(54, 54 + paletteSize); // 获取调色板数据
+
+    // 3. 获取像素数据
+    const pixelDataStart = 54 + paletteSize;
+    const pixelData = bmpData.slice(pixelDataStart);
+
+    // 4. 颜色深度压缩：将颜色从 24 位减少到目标颜色深度
+    let compressedPixels = [];
+
+    for (let i = 0; i < pixelData.length; i += 3) {
+        const r = pixelData[i];
+        const g = pixelData[i + 1];
+        const b = pixelData[i + 2];
+        
+        // 将24位颜色转换为RGB
+        const closestColor = findClosestColor(r, g, b, targetColorDepth, palette);
+
+        compressedPixels.push(closestColor);
+    }
+
+    // 5. 返回修改后的 BMP 数据
+    const newBmpData = Buffer.concat([fileHeader, infoHeader, palette, Buffer.from(compressedPixels)]);
+    return newBmpData;
+}
+
+// 简单的颜色压缩算法：选择最接近的颜色
+function findClosestColor(r, g, b, targetColorDepth, palette) {
+    let closestColorIndex = 0;
+    let minDistance = Infinity;
+
+    // 遍历调色板，找到最接近的颜色
+    for (let i = 0; i < palette.length; i += 4) {
+        const paletteR = palette[i];
+        const paletteG = palette[i + 1];
+        const paletteB = palette[i + 2];
+
+        // 计算颜色之间的距离 (简单的欧几里得距离)
+        const distance = Math.sqrt(Math.pow(r - paletteR, 2) + Math.pow(g - paletteG, 2) + Math.pow(b - paletteB, 2));
+        
+        if (distance < minDistance) {
+            minDistance = distance;
+            closestColorIndex = i / 4; // 获取最接近的颜色索引
+        }
+    }
+
+    return closestColorIndex;
+}
