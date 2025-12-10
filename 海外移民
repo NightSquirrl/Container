@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jimp 前端 BMP 压缩示例</title>
+    <!-- 引入 Jimp 的浏览器版本 (使用 cdnjs) -->
+    <!-- 注意：Jimp 库文件较大，初次加载可能需要一点时间 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jimp/0.16.1/jimp.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .container { display: flex; gap: 20px; flex-wrap: wrap; }
+        .box { border: 1px solid #ccc; padding: 10px; border-radius: 8px; max-width: 45%; }
+        img { max-width: 100%; height: auto; display: block; margin-top: 10px; }
+        .info { font-size: 12px; color: #555; margin-top: 5px; }
+        button { margin-top: 10px; padding: 8px 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h2>BMP 图片压缩 (通过 Resize) - 保持 BMP 格式</h2>
+    <p>说明：由于 BMP 是无压缩格式，为了减小体积，本程序会对图片进行尺寸缩放 (变为原图的 70%)。</p>
+    
+    <input type="file" id="fileInput" accept="image/bmp">
+    <div id="status" style="margin-top: 10px; color: blue;"></div>
+
+    <div class="container" id="previewContainer" style="display:none;">
+        <div class="box">
+            <h3>原始图片</h3>
+            <div class="info" id="originalInfo"></div>
+            <img id="originalImg" src="" alt="Original">
+        </div>
+        <div class="box">
+            <h3>压缩后 (BMP)</h3>
+            <div class="info" id="compressedInfo"></div>
+            <img id="compressedImg" src="" alt="Compressed">
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // 检查是不是 BMP
+            if (file.type !== 'image/bmp' && !file.name.toLowerCase().endsWith('.bmp')) {
+                alert('请上传 BMP 格式的图片');
+                return;
+            }
+
+            const statusDiv = document.getElementById('status');
+            const previewContainer = document.getElementById('previewContainer');
+            
+            statusDiv.textContent = '正在处理中，请稍候...';
+            previewContainer.style.display = 'none';
+
+            try {
+                // 1. 读取文件为 ArrayBuffer
+                const arrayBuffer = await file.arrayBuffer();
+
+                // 2. 使用 Jimp 读取数据
+                const image = await Jimp.read(arrayBuffer);
+
+                // 显示原始信息
+                const originalSizeKB = (file.size / 1024).toFixed(2);
+                document.getElementById('originalInfo').textContent = 
+                    `尺寸: ${image.bitmap.width}x${image.bitmap.height} | 体积: ${originalSizeKB} KB`;
+                
+                // 创建原始图片预览
+                const originalUrl = URL.createObjectURL(file);
+                document.getElementById('originalImg').src = originalUrl;
+
+                // 3. 执行“压缩”操作
+                // 核心逻辑：BMP 不支持 quality 设置，必须通过 resize 减小数据量
+                // 这里设置为原图的 70%，模式使用 Jimp.RESIZE_BICUBIC (双三次插值，画质较好)
+                image.scale(0.7, Jimp.RESIZE_BICUBIC); 
+
+                // 4. 获取处理后的 Buffer，强制指定 MIME 类型为 BMP
+                const compressedBuffer = await image.getBufferAsync(Jimp.MIME_BMP);
+
+                // 5. 将 Buffer 转回 Blob 以便在前端展示或下载
+                const compressedBlob = new Blob([compressedBuffer], { type: 'image/bmp' });
+                const compressedUrl = URL.createObjectURL(compressedBlob);
+
+                // 显示压缩后信息
+                const compressedSizeKB = (compressedBlob.size / 1024).toFixed(2);
+                const compressionRatio = ((1 - compressedBlob.size / file.size) * 100).toFixed(1);
+
+                document.getElementById('compressedInfo').textContent = 
+                    `尺寸: ${image.bitmap.width}x${image.bitmap.height} | 体积: ${compressedSizeKB} KB | 减小了: ${compressionRatio}%`;
+                
+                document.getElementById('compressedImg').src = compressedUrl;
+                
+                statusDiv.textContent = '处理完成！';
+                previewContainer.style.display = 'flex';
+
+            } catch (err) {
+                console.error(err);
+                statusDiv.textContent = '处理失败，请检查控制台错误信息。注意：部分浏览器可能对大尺寸 BMP 内存限制较严。';
+            }
+        });
+    </script>
+</body>
+</html>
