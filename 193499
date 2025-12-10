@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jimp BMP 色深压缩 (24位 -> 8位)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jimp/0.16.1/jimp.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        .box { border: 1px solid #ddd; padding: 15px; margin-top: 15px; border-radius: 8px; background: #f9f9f9; }
+        .preview { display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
+        .img-container { text-align: center; max-width: 45%; }
+        img { max-width: 100%; height: auto; border: 1px solid #999; }
+        .info { font-size: 13px; color: #333; margin-bottom: 5px; font-weight: bold; }
+        .btn { background: #007bff; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn:disabled { background: #ccc; }
+    </style>
+</head>
+<body>
+
+    <h2>BMP 色深压缩 (不改变尺寸)</h2>
+    <p>
+        原理：将 24位真彩色 BMP (每像素3字节) 转换为 8位灰度 BMP (每像素1字节)。<br>
+        <span style="color:red; font-size: 0.9em;">注意：Jimp 原生不支持导出8位BMP，本程序使用了自定义编码器来实现物理压缩。</span>
+    </p>
+
+    <div class="box">
+        <input type="file" id="fileInput" accept="image/bmp">
+    </div>
+    
+    <div id="status" style="margin-top:10px; color:blue;"></div>
+
+    <div class="preview" id="previewArea" style="display:none;">
+        <div class="img-container">
+            <div class="info">原始图片 (24-bit)</div>
+            <div id="origInfo" style="font-size:12px; margin-bottom:5px;"></div>
+            <img id="origImg">
+        </div>
+        <div class="img-container">
+            <div class="info">压缩后 (8-bit 灰度)</div>
+            <div id="compInfo" style="font-size:12px; margin-bottom:5px;"></div>
+            <img id="compImg">
+        </div>
+    </div>
+
+    <script>
+        // --- 核心工具函数：将 Jimp 对象转换为 8位 BMP 二进制数据 ---
+        function write8BitBmp(jimpImage) {
+            const width = jimpImage.bitmap.width;
+            const height = jimpImage.bitmap.height;
+            
+            // 1. 计算行补齐 (BMP 要求每行字节数必须是 4 的倍数)
+            // 8位深度下，1个像素=1字节
+            const rowPadding = (4 - (width % 4)) % 4;
+            const rowSize = width + rowPadding;
+            const pixelDataSize = rowSize * height;
+            
+            // 2. 文件头大小
+            // FileHeader(14) + InfoHeader(40) + Palette(256*4 = 1024)
+            const fileSize = 14 + 40 + 1024 + pixelDataSize;
+            const buffer = new ArrayBuffer(fileSize);
+            const view = new DataView(buffer);
+            
+            let pos = 0;
+
+            // --- A. BITMAPFILEHEADER (14 bytes) ---
+            view.setUint16(pos, 0x4D42, true); pos += 2; // "BM"
+            view.setUint32(pos, fileSize, true); pos += 4; // 文件大小
+            view.setUint16(pos, 0, true); pos += 2; // 保留
+            view.setUint16(pos, 0, true); pos += 2; // 保留
+            view.setUint32(pos, 14 + 40 + 1024, true); pos += 4; // 像素数据偏移量 (OffBits)
+
+            // --- B. BITMAPINFOHEADER (40 bytes) ---
+            view.setUint32(pos, 40, true); pos += 4; // Header Size
+            view.setInt32(pos, width, true); pos += 4; // Width
+            view.setInt32(pos, height, true); pos += 4; // Height (正数表示倒向，BMP通常是从下到上存储，但这里我们按常规处理，稍后调整写入顺序)
+            // 注意：为了简化写入逻辑，我们通常将 Height 设为正数，然后倒序写入行，或者设为负数(部分兼容性问题)。
+            // 这里我们用标准正数，写入时倒序处理行。
+            
+            view.setUint16(pos, 1, true); pos += 2; // Planes
+            view.setUint16(pos, 8, true); pos += 2; // BitCount (8位!)
+            view.setUint32(pos, 0, true); pos += 4; // Compression (BI_RGB = 0)
+            view.setUint32(pos, pixelDataSize, true); pos += 4; // SizeImage
+            view.setInt32(pos, 2835, true); pos += 4; // XPixelsPerMeter
+            view.setInt32(pos, 2835, true); pos += 4; // YPixelsPerMeter
+            view.setUint32(pos, 256, true); pos += 4; // ClrUsed (使用调色板颜色数)
+            view.setUint32(pos, 256, true); pos += 4; // ClrImportant
+
+            // --- C. 调色板 (Palette) 256*4 bytes ---
+            // 构建灰度调色板: (0,0,0), (1,1,1) ... (255,255,255)
+            for (let i = 0; i < 256; i++) {
+                view.setUint8(pos++, i); // Blue
+                view.setUint8(pos++, i); // Green
+                view.setUint8(pos++, i); // Red
+                view.setUint8(pos++, 0); // Reserved
+            }
+
+            // --- D. 像素数据 ---
+            // BMP 存储通常是从下到上 (Bottom-up)
+            const data = jimpImage.bitmap.data; // RGBA buffer
+            
+            for (let y = height - 1; y >= 0; y--) {
+                for (let x = 0; x < width; x++) {
+                    // 获取 Jimp 中的像素索引
+                    const idx = (y * width + x) * 4;
+                    const r = data[idx];
+                    const g = data[idx + 1];
+                    const b = data[idx + 2];
+                    
+                    // 计算灰度值 (加权平均法)
+                    const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+                    
+                    // 写入 8位 索引值
+                    view.setUint8(pos++, gray);
+                }
+                // 写入补齐字节
+                for (let p = 0; p < rowPadding; p++) {
+                    view.setUint8(pos++, 0);
+                }
+            }
+
+            return buffer;
+        }
+
+        // --- 主逻辑 ---
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const status = document.getElementById('status');
+            const preview = document.getElementById('previewArea');
+            
+            preview.style.display = 'none';
+            status.textContent = '处理中...';
+
+            try {
+                // 1. 读取原图
+                const buffer = await file.arrayBuffer();
+                const image = await Jimp.read(buffer);
+
+                // 显示原图
+                const origUrl = URL.createObjectURL(file);
+                document.getElementById('origImg').src = origUrl;
+                document.getElementById('origInfo').textContent = 
+                    `${image.bitmap.width}x${image.bitmap.height} | ${(file.size/1024).toFixed(2)} KB`;
+
+                // 2. 压缩处理 (转8位灰度)
+                // 这里我们不需要调用 image.resize，直接使用我们的自定义编码器
+                // 为了视觉一致，我们可以先让 Jimp 变成灰度（可选，因为编码器里已经算了灰度）
+                image.greyscale(); 
+
+                // 3. 使用自定义函数生成 8位 BMP 二进制流
+                const compressedBuffer = write8BitBmp(image);
+
+                // 4. 生成结果 Blob
+                const compressedBlob = new Blob([compressedBuffer], { type: 'image/bmp' });
+                const compUrl = URL.createObjectURL(compressedBlob);
+
+                // 显示结果
+                document.getElementById('compImg').src = compUrl;
+                const ratio = ((1 - compressedBlob.size / file.size) * 100).toFixed(1);
+                document.getElementById('compInfo').textContent = 
+                    `${image.bitmap.width}x${image.bitmap.height} | ${(compressedBlob.size/1024).toFixed(2)} KB | 减小: ${ratio}%`;
+
+                status.textContent = '处理完成！体积已显著减小。';
+                preview.style.display = 'flex';
+
+            } catch (err) {
+                console.error(err);
+                status.textContent = '发生错误，请检查图片是否有效。';
+            }
+        });
+    </script>
+</body>
+</html>
