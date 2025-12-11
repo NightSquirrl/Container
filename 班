@@ -1,0 +1,169 @@
+/**
+ * MiniAlgebrite - 一个极其精简的符号计算引擎
+ * 功能：实现了基础的词法分析、语法解析和代数展开（分配律）
+ */
+const MiniAlgebrite = {
+    // 1. 词法分析器：将字符串转换为 Token 列表
+    tokenize(input) {
+        const tokens = [];
+        // 匹配：数字、变量名、操作符、括号
+        const regex = /\s*([0-9]+|[a-zA-Z]+|[\+\-\*\/\(\)])\s*/g;
+        let match;
+        while ((match = regex.exec(input)) !== null) {
+            // 避免无限循环最后空匹配
+            if (match.index === regex.lastIndex) regex.lastIndex++;
+            if (match[1]) tokens.push(match[1]);
+        }
+        return tokens;
+    },
+
+    // 2. 语法解析器：将 Token 列表转换为 AST (抽象语法树)
+    parse(tokens) {
+        let position = 0;
+
+        function peek() {
+            return tokens[position];
+        }
+
+        function consume() {
+            return tokens[position++];
+        }
+
+        // 解析因子 (数字、变量、或括号内的表达式)
+        function parseFactor() {
+            const token = consume();
+            if (!token) throw new Error("Unexpected end of input");
+            
+            if (token === '(') {
+                const expr = parseExpression();
+                if (consume() !== ')') throw new Error("Expected ')'");
+                return expr;
+            }
+            // 如果是数字
+            if (!isNaN(token)) {
+                return { type: 'Number', value: Number(token) };
+            }
+            // 否则是变量符号
+            return { type: 'Symbol', name: token };
+        }
+
+        // 解析乘法/除法 (优先级高于加减)
+        function parseTerm() {
+            let left = parseFactor();
+            while (peek() === '*' || peek() === '/') {
+                const op = consume();
+                const right = parseFactor();
+                left = { type: 'BinaryOp', operator: op, left, right };
+            }
+            return left;
+        }
+
+        // 解析加法/减法
+        function parseExpression() {
+            let left = parseTerm();
+            while (peek() === '+' || peek() === '-') {
+                const op = consume();
+                const right = parseTerm();
+                left = { type: 'BinaryOp', operator: op, left, right };
+            }
+            return left;
+        }
+
+        return parseExpression();
+    },
+
+    // 3. 转换器：核心逻辑，实现 expand (展开)
+    // 递归应用分配律: a*(b+c) => a*b + a*c
+    expand(node) {
+        if (!node) return null;
+
+        if (node.type === 'BinaryOp') {
+            // 先递归展开左右子节点
+            const left = this.expand(node.left);
+            const right = this.expand(node.right);
+
+            if (node.operator === '*') {
+                // 情况 1: (A + B) * C
+                if (left.type === 'BinaryOp' && left.operator === '+') {
+                    // 变成 (A * C) + (B * C)
+                    // 注意：这里生成的新节点需要再次调用 expand，以处理嵌套情况
+                    return this.expand({
+                        type: 'BinaryOp',
+                        operator: '+',
+                        left: { type: 'BinaryOp', operator: '*', left: left.left, right: right },
+                        right: { type: 'BinaryOp', operator: '*', left: left.right, right: right }
+                    });
+                }
+                // 情况 2: A * (B + C)
+                if (right.type === 'BinaryOp' && right.operator === '+') {
+                    // 变成 (A * B) + (A * C)
+                    return this.expand({
+                        type: 'BinaryOp',
+                        operator: '+',
+                        left: { type: 'BinaryOp', operator: '*', left: left, right: right.left },
+                        right: { type: 'BinaryOp', operator: '*', left: left, right: right.right }
+                    });
+                }
+            }
+            
+            // 如果没有发生分配，保持原样但更新子节点
+            return { type: 'BinaryOp', operator: node.operator, left, right };
+        }
+        
+        // 数字或符号直接返回
+        return node;
+    },
+
+    // 4. 代码生成器：将 AST 转回字符串
+    print(node) {
+        if (!node) return '';
+        if (node.type === 'Number') return node.value.toString();
+        if (node.type === 'Symbol') return node.name;
+        if (node.type === 'BinaryOp') {
+            const leftStr = this.print(node.left);
+            const rightStr = this.print(node.right);
+            // 简单的字符串拼接，实际库会处理运算符优先级来决定是否加括号
+            // 这里因为我们做的是全展开，理论上不需要外层括号
+            return `${leftStr}${node.operator}${rightStr}`;
+        }
+    },
+
+    // 主运行函数，模拟 Algebrite.run
+    run(command) {
+        // 简单解析命令，例如 "expand(...)"
+        const match = command.match(/^expand\((.*)\)$/);
+        if (!match) {
+            return "Error: Only support 'expand(...)' command.";
+        }
+        
+        const expressionStr = match[1];
+        
+        try {
+            // 1. Tokenize
+            const tokens = this.tokenize(expressionStr);
+            // 2. Parse
+            const ast = this.parse(tokens);
+            // 3. Transform (Expand)
+            const expandedAst = this.expand(ast);
+            // 4. Print
+            return this.print(expandedAst);
+        } catch (e) {
+            return "Error: " + e.message;
+        }
+    }
+};
+
+// --- 测试代码 ---
+
+const expression = '(a+b)*c';
+
+// 调用自定义的 run 方法
+const result = MiniAlgebrite.run('expand(' + expression + ')');
+
+console.log("输入:", expression);
+console.log("输出:", result); 
+
+// 测试更复杂的嵌套
+const complexExpr = '(a+b)*(c+d)';
+console.log("复杂输入:", complexExpr);
+console.log("复杂输出:", MiniAlgebrite.run('expand(' + complexExpr + ')'));
