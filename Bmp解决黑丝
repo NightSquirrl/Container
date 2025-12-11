@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jimp 前端 BMP 压缩示例 (修正版)</title>
+    <!-- 引入 Jimp -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jimp/0.16.1/jimp.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .container { display: flex; gap: 20px; flex-wrap: wrap; }
+        .box { border: 1px solid #ccc; padding: 10px; border-radius: 8px; max-width: 45%; }
+        img { max-width: 100%; height: auto; display: block; margin-top: 10px; background: #eee; } /* 增加背景色以便观察透明图 */
+        .info { font-size: 12px; color: #555; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <h2>BMP 图片压缩 (修正版：解决全黑问题)</h2>
+    <p>说明：此版本增加了<b>背景合并</b>步骤，防止因 Alpha 通道丢失导致图片变黑。</p>
+    
+    <input type="file" id="fileInput" accept="image/bmp">
+    <div id="status" style="margin-top: 10px; color: blue;"></div>
+
+    <div class="container" id="previewContainer" style="display:none;">
+        <div class="box">
+            <h3>原始图片</h3>
+            <div class="info" id="originalInfo"></div>
+            <img id="originalImg" src="" alt="Original">
+        </div>
+        <div class="box">
+            <h3>压缩后 (BMP)</h3>
+            <div class="info" id="compressedInfo"></div>
+            <img id="compressedImg" src="" alt="Compressed">
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const statusDiv = document.getElementById('status');
+            const previewContainer = document.getElementById('previewContainer');
+            
+            statusDiv.textContent = '正在处理中...';
+            previewContainer.style.display = 'none';
+
+            try {
+                // 1. 读取
+                const arrayBuffer = await file.arrayBuffer();
+                const image = await Jimp.read(arrayBuffer);
+
+                // 显示原始预览
+                const originalSizeKB = (file.size / 1024).toFixed(2);
+                document.getElementById('originalInfo').textContent = 
+                    `尺寸: ${image.bitmap.width}x${image.bitmap.height} | 体积: ${originalSizeKB} KB`;
+                document.getElementById('originalImg').src = URL.createObjectURL(file);
+
+                // 2. 缩放 (Resize)
+                image.scale(0.7, Jimp.RESIZE_BICUBIC);
+
+                // ================== 关键修正代码开始 ==================
+                // 问题：直接保存 BMP 会因为 Alpha 通道问题导致全黑。
+                // 解决：创建一个纯白背景的新图，将原图合成上去，消除透明度。
+                
+                const w = image.bitmap.width;
+                const h = image.bitmap.height;
+
+                // 创建一个纯白色的新画布 (0xFFFFFFFF = 白色，不透明)
+                // 注意：在浏览器版 Jimp 中，new Jimp 可能不是 Promise，我们用回调方式封装一下以防万一，
+                // 或者直接利用 Jimp 提供的 clone 方法改造。这里使用最稳妥的 Promise 封装法：
+                
+                const processedImage = await new Promise((resolve, reject) => {
+                    new Jimp(w, h, 0xFFFFFFFF, (err, bg) => {
+                        if (err) reject(err);
+                        // 将缩放后的图片 (image) 叠加到 白色背景 (bg) 上
+                        bg.composite(image, 0, 0);
+                        resolve(bg);
+                    });
+                });
+                // ================== 关键修正代码结束 ==================
+
+                // 3. 导出 buffer
+                const compressedBuffer = await processedImage.getBufferAsync(Jimp.MIME_BMP);
+
+                // 4. 显示结果
+                const compressedBlob = new Blob([compressedBuffer], { type: 'image/bmp' });
+                const compressedUrl = URL.createObjectURL(compressedBlob);
+                const compressedSizeKB = (compressedBlob.size / 1024).toFixed(2);
+                
+                document.getElementById('compressedInfo').textContent = 
+                    `尺寸: ${w}x${h} | 体积: ${compressedSizeKB} KB`;
+                document.getElementById('compressedImg').src = compressedUrl;
+                
+                statusDiv.textContent = '处理完成！已修复颜色问题。';
+                previewContainer.style.display = 'flex';
+
+            } catch (err) {
+                console.error("处理出错:", err);
+                statusDiv.textContent = '处理失败，请查看控制台报错。';
+            }
+        });
+    </script>
+</body>
+</html>
